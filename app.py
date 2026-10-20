@@ -31,6 +31,15 @@ def make_icon():
         return "✦"
 
 
+# Always use the light theme, even if the phone or browser is in dark mode.
+# (The same settings are in .streamlit/config.toml; this is a backup in case that file is missing.)
+for _name, _value in {"theme.base": "light", "theme.primaryColor": "#16a05a", "theme.backgroundColor": "#ffffff",
+                      "theme.secondaryBackgroundColor": "#f3faf5", "theme.textColor": "#0f2a1a"}.items():
+    try:
+        st._config.set_option(_name, _value)
+    except Exception:
+        pass
+
 st.set_page_config(page_title="FreelanceAI", page_icon=make_icon(), layout="wide")
 
 # ---------- Languages ----------
@@ -498,12 +507,12 @@ PROVIDERS = {
     "Groq": {
         "secret": "GROQ_API_KEY", "link": "console.groq.com/keys",
         "url": "https://api.groq.com/openai/v1/chat/completions",
-        "models": ["llama-3.3-70b-versatile", "openai/gpt-oss-20b"],
+        "models": ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"],
     },
     "OpenRouter": {
         "secret": "OPENROUTER_API_KEY", "link": "openrouter.ai/keys",
         "url": "https://openrouter.ai/api/v1/chat/completions",
-        "models": ["openai/gpt-oss-120b:free", "openai/gpt-oss-20b:free", "meta-llama/llama-3.3-70b-instruct:free"],
+        "models": ["openrouter/free", "nvidia/nemotron-3-super-120b-a12b:free", "minimax/minimax-m3.1-flash:free"],
     },
 }
 
@@ -795,9 +804,14 @@ def current_models(provider, _key):
             rows = fetch_json("https://openrouter.ai/api/v1/models")["data"]
             names = [r["id"] for r in rows if r["id"].endswith(":free")
                      and "text" in r.get("architecture", {}).get("output_modalities", ["text"])]
-        # Put the best known models first, then the rest.
-        best = ("llama-3.3-70b", "gpt-oss-120b", "llama-4", "qwen3", "kimi", "deepseek", "gpt-oss-20b", "gemma", "mistral", "llama-3.1-8b")
+        # Put the best known models first, then the rest. (Groq's free keys no longer run Llama, so Llama goes last.)
+        if provider == "Groq":
+            best = ("gpt-oss-120b", "gpt-oss-20b", "qwen3", "compound", "kimi", "deepseek", "llama")
+        else:
+            best = ("nemotron-3-ultra", "minimax", "nemotron-3-super", "gpt-oss", "qwen", "laguna", "gemma", "llama")
         names.sort(key=lambda n: next((i for i, w in enumerate(best) if w in n), len(best)))
+        if provider == "OpenRouter":
+            names = ["openrouter/free"] + names      # this one picks any free model that is working right now
         return names[:6] or info["models"]
     except Exception:
         return info["models"]

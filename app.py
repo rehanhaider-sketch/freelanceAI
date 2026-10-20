@@ -817,18 +817,34 @@ def current_models(provider, _key):
         return info["models"]
 
 
-def ask_openai_style(prompt, api_key, url, models):
+FILE_AIS = ("Gemini", "OpenRouter")      # the AIs that can read images and PDFs
+
+
+def ask_openai_style(prompt, api_key, url, models, files=()):
     """Groq and OpenRouter: send the prompt to their web address and read the answer.
+    Images and PDFs (OpenRouter only) are sent as extra parts of the message.
     If one model is busy or gone, the next one is tried."""
+    import base64
+    content = prompt
+    if files:
+        content = [{"type": "text", "text": prompt}]
+        for number, (data, mime) in enumerate(files, 1):
+            link = f"data:{mime};base64," + base64.b64encode(data).decode()
+            if mime == "application/pdf":
+                content.append({"type": "file", "file": {"filename": f"file{number}.pdf", "file_data": link}})
+            else:
+                content.append({"type": "image_url", "image_url": {"url": link}})
+        # openrouter/free only picks free models that can handle the files; the second one is a vision model
+        models = ["openrouter/free", "nvidia/nemotron-3.5-super-vl:free"]
     last_error = None
     for model in models:
-        body = json.dumps({"model": model, "messages": [{"role": "user", "content": prompt}]}).encode()
+        body = json.dumps({"model": model, "messages": [{"role": "user", "content": content}]}).encode()
         request = urllib.request.Request(
             url, data=body,
             headers={"Authorization": "Bearer " + api_key, "Content-Type": "application/json", "User-Agent": "FreelanceAI/1.0"},
         )
         try:
-            with urllib.request.urlopen(request, timeout=40) as reply:
+            with urllib.request.urlopen(request, timeout=60) as reply:
                 return json.loads(reply.read())["choices"][0]["message"]["content"]
         except urllib.error.HTTPError as e:
             last_error = RuntimeError(f"{model}: {e.code} {e.read().decode(errors='ignore')[:150]}")
@@ -839,8 +855,9 @@ def ask_openai_style(prompt, api_key, url, models):
 
 def ask_ai(prompt, provider, files=()):
     """Send the prompt to the AI the user chose and return the answer as text.
-    If that AI is busy or fails, the other AIs that have a key are tried (only when there are no attached files)."""
-    order = [provider] + ([n for n in PROVIDERS if n != provider and get_key(n)] if not files else [])
+    If that AI is busy or fails, the other AIs that have a key are tried (with attached files, only Gemini and OpenRouter can be used)."""
+    others = [n for n in PROVIDERS if n != provider and get_key(n) and (not files or n in FILE_AIS)]
+    order = [provider] + others
     first_error = None
     for name in order:
         try:
@@ -848,7 +865,7 @@ def ask_ai(prompt, provider, files=()):
             if name == "Gemini":
                 return ask_gemini(prompt, key, files)
             info = PROVIDERS[name]
-            return ask_openai_style(prompt, key, info["url"], current_models(name, key))
+            return ask_openai_style(prompt, key, info["url"], current_models(name, key), files)
         except Exception as e:
             first_error = first_error or e
     raise first_error
@@ -860,8 +877,8 @@ MAX_FILE_MB = 10
 
 def read_attachments(uploaded, provider):
     """Turn the uploaded files into (text to add to the prompt, files for Gemini, notes for the user).
-    Text files are added to the prompt. Images and PDFs go to Gemini directly.
-    Groq and OpenRouter only read text, so for them we pull the text out of a PDF and skip images."""
+    Text files are added to the prompt. 
+    Gemini and OpenRouter read images and PDFs directly. Groq only reads text, so for it we pull the text out of a PDF and skip images."""
     extra_text, gemini_files, notes = "", [], []
     for f in uploaded or []:
         ext = f.name.rsplit(".", 1)[-1].lower()
@@ -870,7 +887,7 @@ def read_attachments(uploaded, provider):
             notes.append(f"{f.name} is bigger than {MAX_FILE_MB} MB, so it was skipped.")
         elif ext in ("txt", "md", "csv"):
             extra_text += f"\n\nATTACHED FILE ({f.name}):\n{data.decode('utf-8', errors='ignore')[:8000]}"
-        elif provider == "Gemini":
+        elif provider in FILE_AIS:
             mime = "application/pdf" if ext == "pdf" else "image/" + ("jpeg" if ext == "jpg" else ext)
             gemini_files.append((data, mime))
         elif ext == "pdf":
@@ -880,16 +897,16 @@ def read_attachments(uploaded, provider):
                 pages = [p.extract_text() or "" for p in PdfReader(BytesIO(data)).pages]
                 extra_text += f"\n\nATTACHED FILE ({f.name}):\n{chr(10).join(pages)[:8000]}"
             except Exception:
-                notes.append(f"{f.name}: {provider} cannot read PDFs here. Choose Gemini, or install pypdf (see the FAQ).")
+                notes.append(f"{f.name}: {provider} cannot read PDFs here. Choose Gemini or OpenRouter, or install pypdf (see the FAQ).")
         else:
-            notes.append(f"{f.name}: images only work with Gemini. Choose Gemini to use it.")
+            notes.append(f"{f.name}: images only work with Gemini or OpenRouter. Choose one of them to use it.")
     return extra_text, gemini_files, notes
 
 
 AI_INFO = {
     "Gemini": "Best answers. Reads images and PDFs.",
     "Groq": "Very fast. Reads text only.",
-    "OpenRouter": "Free backup models. Text only.",
+    "OpenRouter": "Many AI models in one. Reads images and PDFs.",
 }
 
 

@@ -51,7 +51,7 @@ TEXTS = {
     "Choose the AI": ("AI chunein", "KI wählen", "Elige la IA", "Choisir l'IA"),
     "Best answers. Reads images and PDFs.": ("Behtareen jawab. Images aur PDFs parhta hai.", "Beste Antworten. Liest Bilder und PDFs.", "Mejores respuestas. Lee imágenes y PDF.", "Meilleures réponses. Lit les images et les PDF."),
     "Very fast. Reads text only.": ("Bohat tez. Sirf text parhta hai.", "Sehr schnell. Liest nur Text.", "Muy rápida. Solo lee texto.", "Très rapide. Lit uniquement le texte."),
-    "Free backup models. Text only.": ("Free backup models. Sirf text.", "Kostenlose Ersatzmodelle. Nur Text.", "Modelos gratuitos de respaldo. Solo texto.", "Modèles de secours gratuits. Texte uniquement."),
+    "Many AI models in one. Reads images and PDFs.": ("Bohat se AI models aik mein. Images aur PDFs parhta hai.", "Viele KI-Modelle in einem. Liest Bilder und PDFs.", "Muchos modelos de IA en uno. Lee imágenes y PDF.", "Plusieurs modèles d'IA en un. Lit les images et les PDF."),
     "Needs an API key.": ("API key chahiye.", "Braucht einen API-Schlüssel.", "Necesita una clave API.", "Nécessite une clé API."),
     "Paste the job post here...": ("Job post yahan paste karein...", "Füge hier die Jobanzeige ein ...", "Pega aquí la oferta de trabajo...", "Collez ici l'offre d'emploi..."),
     "Paste the job post here, then press send...": ("Job post yahan paste karein, phir send dabayein...", "Füge hier die Jobanzeige ein und drücke dann auf Senden ...", "Pega aquí la oferta y pulsa enviar...", "Collez ici l'offre, puis appuyez sur envoyer..."),

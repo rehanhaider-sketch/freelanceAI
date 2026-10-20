@@ -1,4 +1,4 @@
-# All translations for FreelanceAI live in this file.
+# All translations for Gigflare live in this file.
 # Each line is:  "English text": (Roman Urdu, German, Spanish, French)
 # If a text is missing here, the app simply shows the English text.
 # The pieces like {ai} or {n} are filled in by the app, so keep them as they are.

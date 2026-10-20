@@ -18,14 +18,16 @@ from translations import AI_LANGUAGE_NAME, LANGUAGES, POSITION, TEXTS
 
 # ---------- Page setup ----------
 def make_icon():
-    """The tab icon: a green rounded square with a white F and a lime dot."""
+    """The tab icon: a green rounded square with a white lamp and a lime bulb."""
     try:
         from PIL import Image, ImageDraw
         img = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
         d = ImageDraw.Draw(img)
         d.rounded_rectangle((0, 0, 127, 127), radius=34, fill="#16a05a")
-        d.polygon([(43, 32), (91, 32), (91, 48), (61, 48), (61, 61), (85, 61), (85, 77), (61, 77), (61, 100), (43, 100)], fill="white")
-        d.ellipse((84, 84, 106, 106), fill="#9be564")
+        d.polygon([(40, 24), (88, 24), (106, 76), (22, 76)], fill="white")
+        d.ellipse((50, 78, 78, 106), fill="#9be564")
+        d.line([(26, 96), (16, 104)], fill="#9be564", width=8)
+        d.line([(102, 96), (112, 104)], fill="#9be564", width=8)
         return img
     except Exception:
         return "✦"
@@ -40,7 +42,7 @@ for _name, _value in {"theme.base": "light", "theme.primaryColor": "#16a05a", "t
     except Exception:
         pass
 
-st.set_page_config(page_title="FreelanceAI", page_icon=make_icon(), layout="wide")
+st.set_page_config(page_title="Gigflare", page_icon=make_icon(), layout="wide")
 
 # ---------- Languages ----------
 def t(text, **fill):
@@ -67,11 +69,12 @@ def lang_picker(where):
         )
 
 
-# The FreelanceAI logo: a letter F with a small dot (drawn as a tiny picture)
+# The Gigflare logo: a lamp with a glowing bulb (drawn as a tiny picture)
 LOGO_SVG = (
     '<svg viewBox="0 0 48 48" width="24" height="24" aria-hidden="true">'
-    '<path d="M16 12h18v6H23v5h9v6h-9v9h-7z" fill="currentColor"/>'
-    '<circle class="dot" cx="35" cy="34" r="4"/></svg>'
+    '<path d="M15 9h18l7 19H8z" fill="currentColor"/>'
+    '<circle class="dot" cx="24" cy="35" r="4.4"/>'
+    '<path class="ray" d="M10 36l-4 3M38 36l4 3" stroke-width="3" stroke-linecap="round"/></svg>'
 )
 
 # ---------- Look and feel (CSS) ----------
@@ -415,8 +418,10 @@ st.markdown(
     .logo { color: #ffffff; }
     .logo svg { display: block; }
     .logo .dot { fill: #9be564; }
+    .logo .ray { stroke: #9be564; fill: none; }
     .logo.lime { background: #9be564 !important; color: #06180f !important; }
     .logo.lime .dot { fill: #06180f; }
+    .logo.lime .ray { stroke: #06180f; }
 
     /* ----- Top menu bar (dark green, replaces the sidebar) ----- */
     section[data-testid="stSidebar"], div[data-testid="stSidebarCollapsedControl"], button[data-testid="stExpandSidebarButton"] { display: none !important; }
@@ -590,7 +595,7 @@ TOOLS = [
 ]
 
 FAQ = [
-    ("What is FreelanceAI?", "It is an AI assistant for freelancers. It helps you check job posts, write proposals, price your bids and reply to clients."),
+    ("What is Gigflare?", "It is an AI assistant for freelancers. It helps you check job posts, write proposals, price your bids and reply to clients."),
     ("Who is it for?", "It is for freelancers, the person doing the work. The client is the person you write to, not the person who uses the app."),
     ("Is it free?", "The app is free. It can use Google Gemini, Groq and OpenRouter, and the free plans of these APIs have daily and per-minute limits."),
     ("How do I choose or add another AI?", "Use the AI menu in the box where you type, next to the + button. Gemini, Groq and OpenRouter each need their own free key. Put each key in .streamlit/secrets.toml. An AI without a key shows (no key) in the menu."),
@@ -783,7 +788,7 @@ def ask_gemini(prompt, api_key, files=()):
 
 def fetch_json(url, key=""):
     """Download a small JSON answer from a web address."""
-    headers = {"User-Agent": "FreelanceAI/1.0"}
+    headers = {"User-Agent": "Gigflare/1.0"}
     if key:
         headers["Authorization"] = "Bearer " + key
     with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=15) as reply:
@@ -841,7 +846,7 @@ def ask_openai_style(prompt, api_key, url, models, files=()):
         body = json.dumps({"model": model, "messages": [{"role": "user", "content": content}]}).encode()
         request = urllib.request.Request(
             url, data=body,
-            headers={"Authorization": "Bearer " + api_key, "Content-Type": "application/json", "User-Agent": "FreelanceAI/1.0"},
+            headers={"Authorization": "Bearer " + api_key, "Content-Type": "application/json", "User-Agent": "Gigflare/1.0"},
         )
         try:
             with urllib.request.urlopen(request, timeout=60) as reply:
@@ -1004,7 +1009,7 @@ def how_it_works():
 
 def footer():
     st.markdown(
-        f'<div class="footer"><span>© {datetime.now().year} FreelanceAI</span>'
+        f'<div class="footer"><span>© {datetime.now().year} Gigflare</span>'
         f'<span>{t("Built by {name} · {university} · {course} project", name=escape(DEVELOPER["name"]), university=escape(DEVELOPER["university"]), course=escape(DEVELOPER["course"]))}</span></div>',
         unsafe_allow_html=True,
     )
@@ -1032,7 +1037,7 @@ def home_banner(first_name):
     video, poster = demo_media()
     screen = (
         f'<video id="v" autoplay loop muted playsinline poster="{poster}" src="{video}"></video>'
-        if video else (f'<img src="{poster}">' if poster else '<div class="empty">FreelanceAI</div>')
+        if video else (f'<img src="{poster}">' if poster else '<div class="empty">Gigflare</div>')
     )
     tag_text = t("Dashboard")
     welcome = t("Welcome back, {name}", name=escape(first_name))
@@ -1288,7 +1293,7 @@ def landing_page():
     top_left, top_right = st.columns([5, 1.6], vertical_alignment="center")
     top_left.markdown(
         '<div class="topbar"><div class="brand"><div class="logo">' + LOGO_SVG + "</div>"
-        f'<div><b>FreelanceAI</b><br><small>{t("AI assistant for freelancers")}</small></div></div></div>',
+        f'<div><b>Gigflare</b><br><small>{t("AI assistant for freelancers")}</small></div></div></div>',
         unsafe_allow_html=True,
     )
     with top_right:
@@ -1301,7 +1306,7 @@ def landing_page():
 
     with right:
         with st.container(border=True, key="lampcard"):
-            st.markdown(f'<div class="cardhead"><small>FREELANCEAI</small><b>{t("Welcome back")}.</b><span>{t("Log in or create your account")}</span></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="cardhead"><small>GIGFLARE</small><b>{t("Welcome back")}.</b><span>{t("Log in or create your account")}</span></div>', unsafe_allow_html=True)
             tab_in, tab_up, tab_fp = st.tabs([t("Log in"), t("Sign up"), t("Forgot password")])
 
             with tab_in:
@@ -1419,7 +1424,7 @@ def top_nav():
     page_now = st.session_state.page
     with st.container(key="topnav", horizontal=True, vertical_alignment="center"):
         st.markdown(
-            f'<div class="navbrand"><div class="logo lime">{LOGO_SVG}</div><b>FreelanceAI</b></div>',
+            f'<div class="navbrand"><div class="logo lime">{LOGO_SVG}</div><b>Gigflare</b></div>',
             unsafe_allow_html=True,
         )
         # Links (hidden on phones)
@@ -1740,7 +1745,7 @@ elif page == "Developer":
     with a:
         st.markdown('<p class="sectionhead" style="margin-top:0">About this project</p>', unsafe_allow_html=True)
         st.write(
-            "FreelanceAI is my individual project for the Generative AI course. "
+            "Gigflare is my individual project for the Generative AI course. "
             "It helps freelancers check job posts, write proposals, price their bids and reply to clients. "
             "The AI uses the freelancer's saved profile as context, so every answer is personal."
         )

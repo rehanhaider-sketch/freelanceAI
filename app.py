@@ -503,17 +503,17 @@ MODELS = ["gemini-2.5-flash", "gemini-flash-latest"]   # second one is a backup 
 # The AIs the user can choose from. Each one has its own key in .streamlit/secrets.toml.
 # Groq and OpenRouter use the same simple "OpenAI style" web address, so one function can call both.
 PROVIDERS = {
-    "Gemini": {"secret": "GEMINI_API_KEY", "link": "aistudio.google.com/apikey"},
-    "Groq": {
-        "secret": "GROQ_API_KEY", "link": "console.groq.com/keys",
-        "url": "https://api.groq.com/openai/v1/chat/completions",
-        "models": ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"],
-    },
     "OpenRouter": {
         "secret": "OPENROUTER_API_KEY", "link": "openrouter.ai/keys",
         "url": "https://openrouter.ai/api/v1/chat/completions",
         "models": ["openrouter/free", "nvidia/nemotron-3-super-120b-a12b:free", "minimax/minimax-m3.1-flash:free"],
     },
+    "Groq": {
+        "secret": "GROQ_API_KEY", "link": "console.groq.com/keys",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "models": ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"],
+    },
+    "Gemini": {"secret": "GEMINI_API_KEY", "link": "aistudio.google.com/apikey"},
 }
 
 EMPTY_PROFILE = {"name": "", "title": "", "rate": "", "skills": "", "experience": "", "past_work": ""}
@@ -838,12 +838,20 @@ def ask_openai_style(prompt, api_key, url, models):
 
 
 def ask_ai(prompt, provider, files=()):
-    """Send the prompt to the AI the user chose and return the answer as text."""
-    key = get_key(provider)
-    if provider == "Gemini":
-        return ask_gemini(prompt, key, files)
-    info = PROVIDERS[provider]
-    return ask_openai_style(prompt, key, info["url"], current_models(provider, key))
+    """Send the prompt to the AI the user chose and return the answer as text.
+    If that AI is busy or fails, the other AIs that have a key are tried (only when there are no attached files)."""
+    order = [provider] + ([n for n in PROVIDERS if n != provider and get_key(n)] if not files else [])
+    first_error = None
+    for name in order:
+        try:
+            key = get_key(name)
+            if name == "Gemini":
+                return ask_gemini(prompt, key, files)
+            info = PROVIDERS[name]
+            return ask_openai_style(prompt, key, info["url"], current_models(name, key))
+        except Exception as e:
+            first_error = first_error or e
+    raise first_error
 
 
 FILE_TYPES = ["png", "jpg", "jpeg", "webp", "pdf", "txt", "md", "csv"]

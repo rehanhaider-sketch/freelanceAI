@@ -121,7 +121,10 @@ TEXTS = {
     "Pick a tone and a language, and get a clear reply ready to send.": ("Andaz aur zaban chunein, aur bhejne ke liye saaf jawab payein.", "Wähle Ton und Sprache und erhalte eine klare, versandfertige Antwort.", "Elige un tono y un idioma y obtén una respuesta clara lista para enviar.", "Choisissez un ton et une langue et obtenez une réponse claire prête à envoyer."),
     "Get a better headline, bio and project descriptions.": ("Behtar headline, bio aur project descriptions payein.", "Erhalte eine bessere Überschrift, Bio und Projektbeschreibungen.", "Obtén un mejor titular, biografía y descripciones de proyectos.", "Obtenez un meilleur titre, une meilleure bio et de meilleures descriptions de projets."),
     "Everything the AI wrote for you is saved here, ready to download.": ("Jo kuch AI ne likha yahan save hai, download ke liye tayar.", "Alles, was die KI für dich geschrieben hat, wird hier gespeichert und kann heruntergeladen werden.", "Todo lo que la IA escribió para ti se guarda aquí, listo para descargar.", "Tout ce que l'IA a écrit pour vous est enregistré ici, prêt à être téléchargé."),
-    "Open →": ("Kholein →", "Öffnen →", "Abrir →", "Ouvrir →"),
+    "Open": ("Kholein", "Öffnen", "Abrir", "Ouvrir"),
+    "Privacy": ("Privacy", "Datenschutz", "Privacidad", "Confidentialité"),
+    "Terms": ("Sharayat", "Bedingungen", "Términos", "Conditions"),
+    "Not set": ("Muqarrar nahi", "Nicht festgelegt", "Sin definir", "Non défini"),
 
     # ----- How it works -----
     "Save your profile": ("Apna profile save karein", "Speichere dein Profil", "Guarda tu perfil", "Enregistrez votre profil"),

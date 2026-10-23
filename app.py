@@ -30,7 +30,7 @@ def make_icon():
         d.line([(102, 96), (112, 104)], fill="#9be564", width=8)
         return img
     except Exception:
-        return "✦"
+        return "G"
 
 
 # Always use the light theme, even if the phone or browser is in dark mode.
@@ -148,7 +148,7 @@ st.markdown(
     .account small { color: #5a7766; }
 
     /* ----- Small pieces ----- */
-    .chip { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 500; }
+    .chip { display: inline-block; padding: 5px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; }
     .chip-ok { background: rgba(22,160,90, 0.14); color: #16a05a; border: 1px solid rgba(22,160,90, 0.4); }
     .chip-no { background: rgba(227, 179, 65, 0.15); color: #e3b341; border: 1px solid rgba(227, 179, 65, 0.4); }
     .chip-line { background: rgba(255, 255, 255, 0.06); color: #14693a; border: 1px solid #cfe8d6; margin: 0 8px 8px 0; }
@@ -228,7 +228,7 @@ st.markdown(
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
     }
     .mock-head { display: flex; align-items: center; justify-content: space-between; font-weight: 700; margin-bottom: 12px; }
-    .mock-chip { background: #dff6c8; color: #25570b; font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 600; }
+    .mock-chip { background: #dff6c8; color: #25570b; font-size: 12px; padding: 4px 10px; border-radius: 6px; font-weight: 600; }
     .mock p { color: #24362c; line-height: 1.65; margin: 0 0 14px 0; }
     .mock-tags span { display: inline-block; background: #eef2ef; color: #3b4d43; font-size: 12px; padding: 4px 10px; border-radius: 6px; margin-right: 6px; }
 
@@ -296,7 +296,7 @@ st.markdown(
     .chathint { color: #5a7766; font-size: 16px; margin: 4px 6px 10px 6px; }
     /* round + button and round send button */
     div[class*="st-key-plus_"] button, div[class*="st-key-send_"] button {
-        width: 42px; height: 42px; min-height: 42px; padding: 0; border-radius: 50%;
+        width: 42px; height: 42px; min-height: 42px; padding: 0; border-radius: 10px;
         display: flex; align-items: center; justify-content: center;
     }
     div[class*="st-key-plus_"] button { background: #123828; border: none; color: #0f2a1a; }
@@ -310,7 +310,7 @@ st.markdown(
     /* the AI picker: a soft pill button with a small menu */
     div[class*="st-key-aisel_"] { flex: 0 0 auto; width: auto; }
     div[class*="st-key-aisel_"] button {
-        height: 42px; min-height: 42px; padding: 0 16px 0 12px; border-radius: 999px;
+        height: 42px; min-height: 42px; padding: 0 16px 0 12px; border-radius: 10px;
         background: #e3f3e8; border: 1px solid #bfe0cb; color: #0f2a1a; gap: 6px;
     }
     div[class*="st-key-aisel_"] button:focus, div[class*="st-key-aisel_"] button:focus-visible { box-shadow: 0 0 0 2px rgba(22,160,90,.25) !important; outline: none; }
@@ -321,7 +321,7 @@ st.markdown(
     /* no resize handle in the chat text area, so nothing sits next to the send button */
     div[class*="st-key-chatbox_"] textarea { resize: none; }
     /* log out button at the top right of every page */
-    div[class*="st-key-logout_top"] button { border-radius: 999px; padding: 4px 16px; }
+    div[class*="st-key-logout_top"] button { border-radius: 10px; padding: 4px 16px; }
     @media (max-width: 640px) { div[class*="st-key-aisel_"] button { padding: 0 12px 0 10px; } }
 
     @media (max-width: 900px) {
@@ -384,7 +384,7 @@ st.markdown(
         animation: fadeUp 0.45s ease backwards;
     }
     .card { animation: fadeUp 0.5s ease backwards; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
-    .card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(15, 42, 26, 0.12); }
+    .card:hover { box-shadow: 0 6px 16px rgba(15, 42, 26, 0.10); }
     /* cards appear one after another */
     div[data-testid="stColumn"]:nth-child(2) .card { animation-delay: 0.08s; }
     div[data-testid="stColumn"]:nth-child(3) .card { animation-delay: 0.16s; }
@@ -397,7 +397,6 @@ st.markdown(
     button[data-testid^="stBaseButton"]:active { transform: scale(0.96); }
     button[data-testid="stBaseButton-primary"]:hover { box-shadow: 0 6px 16px rgba(22, 160, 90, 0.35); }
     label[data-testid="stRadioOption"] { transition: background 0.2s ease, transform 0.2s ease; }
-    label[data-testid="stRadioOption"]:hover { transform: translateX(3px); }
 
     /* The chat box glows softly when you click inside it */
     div[class*="st-key-chatbox_"] { transition: border-color 0.2s ease, box-shadow 0.25s ease; }
@@ -405,7 +404,6 @@ st.markdown(
 
     /* While the AI is working, the message pulses; the answer fades in */
     div[data-testid="stSpinner"] { animation: pulse 1.2s ease-in-out infinite; }
-    .stApp::before { animation: breathe 7s ease-in-out infinite alternate; }
     .stApp::after { animation: fadeIn 1s ease; }
 
     /* People who turned off motion in their system get no animations */
@@ -449,7 +447,7 @@ st.markdown(
     .st-key-topnav button:hover { background: rgba(255, 255, 255, 0.09) !important; }
     .st-key-topnav button[data-testid^="stBaseButton-primary"] { background: rgba(155, 229, 100, 0.18) !important; }
     .st-key-topnav button[data-testid^="stBaseButton-primary"], .st-key-topnav button[data-testid^="stBaseButton-primary"] * { color: #9be564 !important; font-weight: 700 !important; }
-    .st-key-topnav .st-key-logout_top button { border: 1px solid #3f8f6b !important; border-radius: 999px !important; padding: 7px 18px !important; }
+    .st-key-topnav .st-key-logout_top button { border: 1px solid #3f8f6b !important; border-radius: 10px !important; padding: 7px 18px !important; }
     .st-key-topnav .st-key-logout_top button:hover { border-color: #9be564 !important; }
     .st-key-topnav [class*="st-key-navtoolson_"] button { background: rgba(155, 229, 100, 0.18) !important; }
     .st-key-topnav [class*="st-key-navtoolson_"] button, .st-key-topnav [class*="st-key-navtoolson_"] button * { color: #9be564 !important; font-weight: 700 !important; }
@@ -483,7 +481,7 @@ st.markdown(
     div[class*="st-key-navt_"] button[data-testid^="stBaseButton-primary"] [data-testid="stMarkdownContainer"] strong { color: #0a6b47 !important; }
     /* language button */
     div[class*="st-key-langsel_land"] { display: flex; justify-content: flex-end; }
-    div[class*="st-key-langsel_land"] button { border-radius: 999px; background: #e3f3e8; border: 1px solid #bfe0cb; padding: 6px 16px; }
+    div[class*="st-key-langsel_land"] button { border-radius: 10px; background: #e3f3e8; border: 1px solid #bfe0cb; padding: 6px 16px; }
     div[class*="st-key-langsel_land"] button, div[class*="st-key-langsel_land"] button * { color: #0f2a1a; font-weight: 600; }
     .account b { color: #0f2a1a; }
     .account small { color: #5a7766; }
@@ -532,6 +530,9 @@ DEVELOPER = {
     "roll": "Roll no. 20",
     "course": "Generative AI course",
 }
+
+# Shown on the Privacy and Terms pages. Fill this in before launch (the contact line stays hidden while it is empty).
+CONTACT_EMAIL = ""
 
 SAMPLE_JOB = (
     "We are a small online clothing store and we need a freelancer to build a simple "
@@ -989,7 +990,7 @@ def tool_cards(with_buttons):
                 unsafe_allow_html=True,
             )
             if with_buttons:
-                col.button(t("Open →"), key="open_" + page_name, on_click=go, args=(page_name,))
+                col.button(t("Open"), key="open_" + page_name, on_click=go, args=(page_name,))
         st.write("")
 
 
@@ -1010,35 +1011,14 @@ def how_it_works():
 def footer():
     st.markdown(
         f'<div class="footer"><span>© {datetime.now().year} Gigflare</span>'
-        f'<span>{t("Built by {name} · {university} · {course} project", name=escape(DEVELOPER["name"]), university=escape(DEVELOPER["university"]), course=escape(DEVELOPER["course"]))}</span></div>',
+        f'<span>{t("Built by {name} · {university} · {course} project", name=escape(DEVELOPER["name"]), university=escape(DEVELOPER["university"]), course=escape(DEVELOPER["course"]))}</span>'
+        f'<span><a href="?doc=privacy" target="_blank" rel="noopener">{t("Privacy")}</a> &nbsp; <a href="?doc=terms" target="_blank" rel="noopener">{t("Terms")}</a></span></div>',
         unsafe_allow_html=True,
     )
 
 
-@st.cache_data(show_spinner=False)
-def demo_media():
-    """Read the demo video and a still picture from the static folder. Missing files are fine."""
-    import base64
-    folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
-
-    def read(name, mime):
-        path = os.path.join(folder, name)
-        if os.path.exists(path):
-            with open(path, "rb") as f:
-                return f"data:{mime};base64," + base64.b64encode(f.read()).decode()
-        return ""
-
-    video = read("demo.webm", "video/webm") or read("demo.mp4", "video/mp4")
-    return video, read("poster.jpg", "image/jpeg")
-
-
 def home_banner(first_name):
-    """The green welcome banner with a phone that plays a short demo of the app."""
-    video, poster = demo_media()
-    screen = (
-        f'<video id="v" autoplay loop muted playsinline poster="{poster}" src="{video}"></video>'
-        if video else (f'<img src="{poster}">' if poster else '<div class="empty">Gigflare</div>')
-    )
+    """The green welcome banner."""
     tag_text = t("Dashboard")
     welcome = t("Welcome back, {name}", name=escape(first_name))
     intro = t("Analyse job posts, write proposals, price your bids and reply to clients, all in one place.")
@@ -1047,40 +1027,23 @@ def home_banner(first_name):
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
       html, body {{ margin: 0; padding: 0; background: transparent; font-family: 'Inter', 'Noto Sans', sans-serif; }}
-      .hero {{ box-sizing: border-box; height: 470px; display: flex; align-items: center; justify-content: space-between; gap: 32px;
-        background: linear-gradient(120deg, #0a6b47 0%, #0d3b2a 70%); border: 1px solid #cfe8d6; border-radius: 18px; padding: 28px 36px; }}
+      .hero {{ box-sizing: border-box; background: linear-gradient(120deg, #0a6b47 0%, #0d3b2a 70%); border: 1px solid #cfe8d6;
+        border-radius: 14px; padding: 36px; }}
       .tag {{ display: inline-block; padding: 4px 10px; border-radius: 4px; background: rgba(155,229,100,.2); color: #b4f080;
         font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }}
-      h1 {{ font-size: 38px; font-weight: 800; color: #fff; margin: 14px 0 8px 0; }}
-      p {{ color: #cfe8d8; font-size: 17px; line-height: 1.55; margin: 0; }}
+      h1 {{ font-size: 36px; font-weight: 800; color: #fff; margin: 14px 0 8px 0; }}
+      p {{ color: #cfe8d8; font-size: 17px; line-height: 1.55; margin: 0; max-width: 640px; }}
       .chips {{ display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }}
-      .chips span {{ padding: 7px 14px; border-radius: 999px; font-size: 15px; font-weight: 600; color: #e4f3ea;
+      .chips span {{ padding: 7px 14px; border-radius: 8px; font-size: 15px; font-weight: 600; color: #e4f3ea;
         background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.28); }}
-      .text {{ flex: 1; min-width: 0; }}
-      .phone {{ flex: 0 0 auto; width: 214px; height: 414px; box-sizing: border-box; padding: 9px; border-radius: 38px; position: relative;
-        background: #0a1a12; border: 2px solid #2c5a45; box-shadow: 0 24px 50px rgba(0,0,0,.45); animation: floaty 6s ease-in-out infinite; }}
-      .phone::before {{ content: ""; position: absolute; top: 14px; left: 50%; width: 58px; height: 14px; margin-left: -29px;
-        border-radius: 999px; background: #0a1a12; z-index: 2; }}
-      .phone video, .phone img, .phone .empty {{ width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 30px;
-        background: #0d3b2a; }}
-      .phone .empty {{ display: flex !important; align-items: center; justify-content: center; color: #9be564; font-weight: 800; font-size: 20px; letter-spacing: .5px; }}
-      @keyframes floaty {{ 0%, 100% {{ transform: translateY(0) rotate(2deg); }} 50% {{ transform: translateY(-10px) rotate(2deg); }} }}
-      @media (max-width: 700px) {{ .phone {{ display: none; }} .hero {{ height: auto; }} }}
-      @media (prefers-reduced-motion: reduce) {{ .phone {{ animation: none; }} }}
     </style>
     <div class="hero">
-      <div class="text"><span class="tag">{tag_text}</span><h1>{welcome}</h1>
-        <p>{intro}</p>
-        <div class="chips">{chips}</div></div>
-      <div class="phone" id="phone">{screen}</div>
+      <span class="tag">{tag_text}</span><h1>{welcome}</h1>
+      <p>{intro}</p>
+      <div class="chips">{chips}</div>
     </div>
-    <script>
-      var v = document.getElementById('v');
-      if (v) {{ v.muted = true; var p = v.play(); if (p && p.catch) p.catch(function () {{}});
-                document.getElementById('phone').onclick = function () {{ v.play(); }}; }}
-    </script>
     """
-    st.components.v1.html(html, height=496)
+    st.components.v1.html(html, height=250)
 
 
 def go(page_name):
@@ -1170,6 +1133,9 @@ div[class*="st-key-langsel_land"] button, div[class*="st-key-langsel_land"] butt
 .lamp-svg .wash { filter: blur(26px); animation: fadeup 2.2s ease-out 0.6s both; }
 .lamp-svg .bulbon { animation: flick 1.3s linear 0.2s both; }
 .lamp-svg .shadeon { animation: flick 1.3s linear 0.2s both; }
+.legal { text-align: center; margin: 18px 0 0 0; }
+.legal a { color: #9bc4ae !important; font-size: 13px; margin: 0 12px; text-decoration: none; }
+.legal a:hover { color: #9be564 !important; text-decoration: underline; }
 .lamphint { text-align: center; color: #9bc4ae !important; font-size: 14px; letter-spacing: 0.05em; margin-top: 4px; animation: pulse 2.4s ease-in-out infinite; }
 .st-key-lamp_pull { position: absolute; left: 170px; top: 270px; width: 70px; z-index: 5; }
 .st-key-lamp_pull button { width: 70px; height: 110px; opacity: 0; cursor: pointer; padding: 0; }
@@ -1280,12 +1246,97 @@ def lamp_scene(on):
                     st.session_state.lamp_on = True
                     st.rerun()
             st.markdown(f'<p class="lamphint">{t("Pull the string to turn on the light")}</p>', unsafe_allow_html=True)
+            st.markdown(legal_links(), unsafe_allow_html=True)
         return None
     left, right = st.columns(2, gap="large", vertical_alignment="center")
     with left:
         with st.container(key="lampwrap"):
             st.markdown(lamp_svg(True), unsafe_allow_html=True)
     return right
+
+
+# ---------- Privacy and Terms pages (open with ?doc=privacy or ?doc=terms, no login needed) ----------
+LEGAL_UPDATED = "23 October 2026"
+
+PRIVACY_TEXT = [
+    ("Who runs Gigflare",
+     "Gigflare is a university project made by {name} ({university}) for the {course}. It is free to use."),
+    ("What we save",
+     "When you sign up we save your name, your email, and your password and recovery word in scrambled form (a salted hash), "
+     "so nobody can read them back. If you fill in My Profile, we save that profile. We also save the history of your requests and "
+     "the AI answers, so you can see them again on the History page. This data is saved in files on the server that runs the app."),
+    ("What is sent to the AI companies",
+     "When you press send, your text, your saved profile and any file you attached are sent to the AI you chose: Google Gemini, Groq or OpenRouter. "
+     "OpenRouter may pass your request on to another company that runs the model. These companies have their own privacy policies. "
+     "Please do not enter passwords, bank details or other private information into the tools."),
+    ("Your own API key",
+     "If you type your own API key in the account menu, it is kept only while your session is open. It is not saved in our files."),
+    ("Ads and tracking",
+     "Gigflare shows no ads and has no analytics or tracking code of its own. The hosting service may keep technical logs and may use its own cookies to run the app."),
+    ("Sharing",
+     "We do not sell your data. Your data is shared only as described above, to get an answer from the AI you chose."),
+    ("How long we keep data",
+     "Your data stays until it is deleted. Because the app runs on free hosting, saved data can also be lost when the app restarts."),
+    ("Your choices",
+     "You can ask for your account and saved data to be deleted. {contact}"),
+    ("Changes",
+     "If this page changes, the date at the top changes too."),
+]
+
+TERMS_TEXT = [
+    ("About these terms",
+     "By using Gigflare you agree to these terms. Gigflare is a free university project and is provided as it is."),
+    ("Your account",
+     "Give correct information when you sign up and keep your password and recovery word private. You are responsible for what happens in your account."),
+    ("AI answers",
+     "The answers are written by AI models from other companies. They can be wrong or incomplete. Read every proposal, price and reply, and fix it before you send it to a client. "
+     "You are responsible for what you send. Suggested prices and match scores are only estimates. Nothing here is legal, tax or financial advice."),
+    ("What you may not do",
+     "Do not use Gigflare for anything illegal, to mislead or spam clients, or to harm others. Do not upload files you have no right to share. "
+     "Do not try to break the app, overload it, or get into other people's accounts."),
+    ("Other companies",
+     "Gigflare is not connected to Upwork, Fiverr or Freelancer. Their names are used only to describe the style of a proposal. "
+     "The terms of the AI companies you choose also apply when your request is sent to them."),
+    ("Availability",
+     "The app runs on free hosting and free AI plans, which have limits. It can be slow or stop working, and features can change or be removed. "
+     "We may delete accounts that break these terms."),
+    ("Liability",
+     "Gigflare is provided without any promise that it will work without errors. As far as the law allows, the developer is not responsible for losses "
+     "that come from using Gigflare or from the AI answers."),
+    ("Changes",
+     "If these terms change, the date at the top changes too. {contact}"),
+]
+
+
+def legal_page(kind):
+    """A plain page for the Privacy Policy or the Terms and Conditions."""
+    title, rows = ("Privacy Policy", PRIVACY_TEXT) if kind == "privacy" else ("Terms and Conditions", TERMS_TEXT)
+    contact = f"Contact: {escape(CONTACT_EMAIL)}." if CONTACT_EMAIL else ""
+    fill = {"name": escape(DEVELOPER["name"]), "university": escape(DEVELOPER["university"]), "course": escape(DEVELOPER["course"]), "contact": contact}
+    body = "".join(f"<h3>{escape(head)}</h3><p>{text.format(**fill)}</p>" for head, text in rows)
+    st.markdown(
+        """<style>
+        .stApp::before, .stApp::after { display: none !important; }
+        .legal-wrap { max-width: 760px; margin: 0 auto; }
+        .legal-wrap h1 { margin-bottom: 4px; }
+        .legal-wrap h3 { margin: 26px 0 6px 0; font-size: 19px; }
+        .legal-wrap p { line-height: 1.65; color: #2c4a39; }
+        .legal-wrap small { color: #5a7766; }
+        </style>""",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f'<div class="legal-wrap"><div class="brand"><div class="logo">{LOGO_SVG}</div><div><b>Gigflare</b></div></div>'
+        f'<h1>{title}</h1><small>Last updated {LEGAL_UPDATED}</small>{body}'
+        f'<p style="margin-top:30px"><a href="./" target="_self">Back to Gigflare</a></p></div>',
+        unsafe_allow_html=True,
+    )
+
+
+def legal_links():
+    """Small Privacy and Terms links. They open in a new tab so nobody gets logged out."""
+    return (f'<p class="legal"><a href="?doc=privacy" target="_blank" rel="noopener">{t("Privacy")}</a>'
+            f'<a href="?doc=terms" target="_blank" rel="noopener">{t("Terms")}</a></p>')
 
 
 # ---------- Landing page (shown before login) ----------
@@ -1352,6 +1403,11 @@ def landing_page():
                     ok, message = reset_password(fp_email, fp_word, fp_new, fp_confirm)
                     (st.success if ok else st.error)(message)
 
+
+# ---------- Privacy / Terms pages need no login ----------
+if st.query_params.get("doc") in ("privacy", "terms"):
+    legal_page(st.query_params.get("doc"))
+    st.stop()
 
 # ---------- Not logged in? Show the landing page and stop ----------
 if "user" not in st.session_state:
@@ -1528,12 +1584,12 @@ elif page == "My Profile":
         st.subheader(t("Saved profile"))
         st.progress(done / 6, text=t("{done} of 6 fields filled", done=done))
         with st.container(border=True):
-            st.markdown(f"**{t('Name:')}** {profile['name'] or '—'}")
-            st.markdown(f"**{t('Title:')}** {profile['title'] or '—'}")
-            st.markdown(f"**{t('Hourly rate:')}** {profile['rate'] or '—'}")
-            st.markdown(f"**{t('Skills:')}** {profile['skills'] or '—'}")
-            st.markdown(f"**{t('Experience:')}** {profile['experience'] or '—'}")
-            st.markdown(f"**{t('Past work:')}** {profile['past_work'] or '—'}")
+            st.markdown(f"**{t('Name:')}** {profile['name'] or t('Not set')}")
+            st.markdown(f"**{t('Title:')}** {profile['title'] or t('Not set')}")
+            st.markdown(f"**{t('Hourly rate:')}** {profile['rate'] or t('Not set')}")
+            st.markdown(f"**{t('Skills:')}** {profile['skills'] or t('Not set')}")
+            st.markdown(f"**{t('Experience:')}** {profile['experience'] or t('Not set')}")
+            st.markdown(f"**{t('Past work:')}** {profile['past_work'] or t('Not set')}")
 
     st.write("")
     tips([

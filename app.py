@@ -1017,8 +1017,29 @@ def footer():
     )
 
 
+def demo_media():
+    """Read the demo video and a still picture from the static folder. Missing files are fine."""
+    import base64
+    folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+
+    def read(name, mime):
+        path = os.path.join(folder, name)
+        if os.path.exists(path):
+            with open(path, "rb") as f:
+                return f"data:{mime};base64," + base64.b64encode(f.read()).decode()
+        return ""
+
+    video = read("demo.webm", "video/webm") or read("demo.mp4", "video/mp4")
+    return video, read("poster.jpg", "image/jpeg")
+
+
 def home_banner(first_name):
-    """The green welcome banner."""
+    """The green welcome banner with a phone that plays a short demo of the app."""
+    video, poster = demo_media()
+    screen = (
+        f'<video id="v" autoplay loop muted playsinline poster="{poster}" src="{video}"></video>'
+        if video else (f'<img src="{poster}">' if poster else '<div class="empty">Gigflare</div>')
+    )
     tag_text = t("Dashboard")
     welcome = t("Welcome back, {name}", name=escape(first_name))
     intro = t("Analyse job posts, write proposals, price your bids and reply to clients, all in one place.")
@@ -1027,23 +1048,40 @@ def home_banner(first_name):
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
       html, body {{ margin: 0; padding: 0; background: transparent; font-family: 'Inter', 'Noto Sans', sans-serif; }}
-      .hero {{ box-sizing: border-box; background: linear-gradient(120deg, #0a6b47 0%, #0d3b2a 70%); border: 1px solid #cfe8d6;
-        border-radius: 14px; padding: 36px; }}
+      .hero {{ box-sizing: border-box; height: 470px; display: flex; align-items: center; justify-content: space-between; gap: 32px;
+        background: linear-gradient(120deg, #0a6b47 0%, #0d3b2a 70%); border: 1px solid #cfe8d6; border-radius: 18px; padding: 28px 36px; }}
       .tag {{ display: inline-block; padding: 4px 10px; border-radius: 4px; background: rgba(155,229,100,.2); color: #b4f080;
         font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }}
-      h1 {{ font-size: 36px; font-weight: 800; color: #fff; margin: 14px 0 8px 0; }}
-      p {{ color: #cfe8d8; font-size: 17px; line-height: 1.55; margin: 0; max-width: 640px; }}
+      h1 {{ font-size: 38px; font-weight: 800; color: #fff; margin: 14px 0 8px 0; }}
+      p {{ color: #cfe8d8; font-size: 17px; line-height: 1.55; margin: 0; }}
       .chips {{ display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }}
       .chips span {{ padding: 7px 14px; border-radius: 8px; font-size: 15px; font-weight: 600; color: #e4f3ea;
         background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.28); }}
+      .text {{ flex: 1; min-width: 0; }}
+      .phone {{ flex: 0 0 auto; width: 214px; height: 414px; box-sizing: border-box; padding: 9px; border-radius: 38px; position: relative;
+        background: #0a1a12; border: 2px solid #2c5a45; box-shadow: 0 24px 50px rgba(0,0,0,.45); animation: floaty 6s ease-in-out infinite; }}
+      .phone::before {{ content: ""; position: absolute; top: 14px; left: 50%; width: 58px; height: 14px; margin-left: -29px;
+        border-radius: 6px; background: #0a1a12; z-index: 2; }}
+      .phone video, .phone img, .phone .empty {{ width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 30px;
+        background: #0d3b2a; }}
+      .phone .empty {{ display: flex !important; align-items: center; justify-content: center; color: #9be564; font-weight: 800; font-size: 20px; letter-spacing: .5px; }}
+      @keyframes floaty {{ 0%, 100% {{ transform: translateY(0) rotate(2deg); }} 50% {{ transform: translateY(-10px) rotate(2deg); }} }}
+      @media (max-width: 700px) {{ .phone {{ display: none; }} .hero {{ height: auto; }} }}
+      @media (prefers-reduced-motion: reduce) {{ .phone {{ animation: none; }} }}
     </style>
     <div class="hero">
-      <span class="tag">{tag_text}</span><h1>{welcome}</h1>
-      <p>{intro}</p>
-      <div class="chips">{chips}</div>
+      <div class="text"><span class="tag">{tag_text}</span><h1>{welcome}</h1>
+        <p>{intro}</p>
+        <div class="chips">{chips}</div></div>
+      <div class="phone" id="phone">{screen}</div>
     </div>
+    <script>
+      var v = document.getElementById('v');
+      if (v) {{ v.muted = true; var p = v.play(); if (p && p.catch) p.catch(function () {{}});
+                document.getElementById('phone').onclick = function () {{ v.play(); }}; }}
+    </script>
     """
-    st.components.v1.html(html, height=250)
+    st.components.v1.html(html, height=496)
 
 
 def go(page_name):
@@ -1125,12 +1163,12 @@ div[class*="st-key-langsel_land"] button, div[class*="st-key-langsel_land"] butt
 
 /* Lamp stage: same size in both states so nothing jumps */
 .st-key-lampstage { min-height: 600px; align-items: center; }
-.st-key-lampwrap { position: relative; width: 300px; max-width: 100%; margin: 0 auto; }
-.lamp-svg { display: block; width: 300px; max-width: 100%; height: auto; overflow: visible; }
+.st-key-lampwrap { will-change: transform; backface-visibility: hidden; position: relative; width: 300px; max-width: 100%; margin: 0 auto; }
+.lamp-svg { shape-rendering: geometricPrecision; transform: translateZ(0); display: block; width: 300px; max-width: 100%; height: auto; overflow: visible; }
 .lamp-svg .sway { transform-origin: 205px 150px; animation: sway 3.2s ease-in-out infinite; }
 .lamp-svg .tug { transform-origin: 205px 150px; animation: tug 1.6s ease-out both; }
-.lamp-svg .cone { filter: blur(10px); animation: fadeup 1.6s ease-out 0.5s both; }
-.lamp-svg .wash { filter: blur(26px); animation: fadeup 2.2s ease-out 0.6s both; }
+.lamp-svg .cone { animation: fadeup 1.6s ease-out 0.5s both; }
+.lamp-svg .wash { animation: fadeup 2.2s ease-out 0.6s both; }
 .lamp-svg .bulbon { animation: flick 1.3s linear 0.2s both; }
 .lamp-svg .shadeon { animation: flick 1.3s linear 0.2s both; }
 .legal { text-align: center; margin: 18px 0 0 0; }
@@ -1176,8 +1214,8 @@ div.st-key-lampcard [role="tab"][aria-selected="true"], div.st-key-lampcard [rol
 @media (min-width: 901px) { [data-testid="stColumn"] .st-key-lampwrap { animation: slideleft 1.5s cubic-bezier(0.65, 0, 0.35, 1) 0.25s both; } }
 @keyframes slideleft { from { transform: translateX(calc(25vw - 40px)); } to { transform: translateX(0); } }
 @keyframes fadeup { from { opacity: 0; } to { opacity: 1; } }
-@keyframes flick { 0% { opacity: 0; } 8% { opacity: 0.9; } 14% { opacity: 0.15; } 26% { opacity: 1; } 34% { opacity: 0.35; } 50%, 100% { opacity: 1; } }
-@keyframes cardin { from { opacity: 0; transform: translateY(24px) scale(0.97); filter: blur(8px); } to { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes flick { 0% { opacity: 0; } 30% { opacity: 0.85; } 45% { opacity: 0.7; } 100% { opacity: 1; } }
+@keyframes cardin { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
 @keyframes sway { 0%, 100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } }
 @keyframes tug { 0% { transform: translateY(0) rotate(0); } 12% { transform: translateY(18px) rotate(0); } 30% { transform: translateY(-4px) rotate(5deg); } 50% { transform: rotate(-4deg); } 70% { transform: rotate(2.5deg); } 100% { transform: rotate(0); } }
 @keyframes pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }

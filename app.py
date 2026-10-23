@@ -1020,13 +1020,15 @@ def footer():
 def demo_media():
     """Read the demo video and a still picture from the static folder. Missing files are fine."""
     import base64
-    folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+    here = os.path.dirname(os.path.abspath(__file__))
+    folders = [os.path.join(here, "static"), here]  # the files can sit in a static folder or next to app.py
 
     def read(name, mime):
-        path = os.path.join(folder, name)
-        if os.path.exists(path):
-            with open(path, "rb") as f:
-                return f"data:{mime};base64," + base64.b64encode(f.read()).decode()
+        for folder in folders:
+            path = os.path.join(folder, name)
+            if os.path.exists(path):
+                with open(path, "rb") as f:
+                    return f"data:{mime};base64," + base64.b64encode(f.read()).decode()
         return ""
 
     video = read("demo.webm", "video/webm") or read("demo.mp4", "video/mp4")

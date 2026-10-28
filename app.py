@@ -1194,7 +1194,8 @@ LAMP_CSS = """
 .stApp::after { display: none !important; }
 /* The soft light that spreads over the page. It is always there and fades in and out. */
 .stApp::before { display: block !important; content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0;
-    background: radial-gradient(ellipse 55% 60% at 27% 52%, rgba(190, 245, 140, 0.22), rgba(120, 210, 110, 0.07) 55%, transparent 80%);
+    background: radial-gradient(ellipse 85% 95% at 27% 48%, rgba(200, 248, 150, 0.38) 0%, rgba(140, 220, 110, 0.20) 30%, rgba(90, 190, 100, 0.09) 58%, transparent 85%);
+    transform-origin: 27% 50%; transform: scale(0.55);
     width: auto; height: auto; right: auto; left: 0; clip-path: none; animation: none; }
 header[data-testid="stHeader"] { background: transparent !important; }
 .topbar .brand b { color: #ffffff !important; }
@@ -1266,7 +1267,7 @@ def lamp_state_css(n):
     if on:
         css = """
 .lamp-svg .lit { opacity: 1; transition: opacity 1.4s ease 0.15s; }
-.stApp::before { opacity: 1; transition: opacity 2s ease 0.1s; }
+.stApp::before { opacity: 1; transform: scale(1); transition: opacity 2.6s ease 0.1s, transform 3.4s cubic-bezier(0.2, 0.6, 0.2, 1) 0.1s; }
 .st-key-lampwrap { transform: translateX(0); transition: transform 1.5s cubic-bezier(0.65, 0, 0.35, 1) 0.1s; }
 .st-key-lampcard { opacity: 1; transform: none; visibility: visible; pointer-events: auto;
     transition: opacity 1.2s ease 1s, transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) 1s, visibility 0s; }
@@ -1277,7 +1278,7 @@ def lamp_state_css(n):
         sway = "animation: sway 3.2s ease-in-out infinite;" if n == 0 else "animation: tugB 1.6s ease-out both;"
         css = """
 .lamp-svg .lit { opacity: 0; transition: opacity 0.9s ease; }
-.stApp::before { opacity: 0; transition: opacity 1s ease; }
+.stApp::before { opacity: 0; transform: scale(0.55); transition: opacity 1.1s ease, transform 1.6s ease; }
 .st-key-lampwrap { transform: translateX(calc(25vw - 40px)); transition: transform 1.5s cubic-bezier(0.65, 0, 0.35, 1) 0.5s; }
 .st-key-lampcard { opacity: 0; transform: translateX(34px); visibility: hidden; pointer-events: none;
     transition: opacity 0.7s ease, transform 0.7s ease, visibility 0s linear 0.7s; }
@@ -1299,15 +1300,18 @@ def lamp_svg():
         '<linearGradient id="shadeOff" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#071c13"/><stop offset="0.35" stop-color="#143c2c"/><stop offset="1" stop-color="#071c13"/></linearGradient>'
         '<linearGradient id="shadeOn" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3fae6b"/><stop offset="0.45" stop-color="#c4f594"/><stop offset="1" stop-color="#3fae6b"/></linearGradient>'
         '<linearGradient id="cone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d3f9ae" stop-opacity="0.46"/><stop offset="1" stop-color="#9be564" stop-opacity="0.02"/></linearGradient>'
+        '<radialGradient id="spread"><stop offset="0" stop-color="#d3f9ae" stop-opacity="0.34"/><stop offset="0.45" stop-color="#9be564" stop-opacity="0.14"/><stop offset="1" stop-color="#9be564" stop-opacity="0"/></radialGradient>'
+        '<linearGradient id="hx" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000"/><stop offset="0.3" stop-color="#888"/><stop offset="0.5" stop-color="#fff"/><stop offset="0.7" stop-color="#888"/><stop offset="1" stop-color="#000"/></linearGradient>'
+        '<mask id="conemask" maskUnits="userSpaceOnUse" x="-60" y="140" width="420" height="400"><rect x="-60" y="140" width="420" height="400" fill="url(#hx)"/></mask>'
         '<radialGradient id="pool"><stop offset="0" stop-color="#9be564" stop-opacity="0.55"/><stop offset="1" stop-color="#9be564" stop-opacity="0"/></radialGradient>'
         '<radialGradient id="glow"><stop offset="0" stop-color="#f4ffd9" stop-opacity="0.95"/><stop offset="1" stop-color="#9be564" stop-opacity="0"/></radialGradient>'
         '<linearGradient id="pole" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#091f16"/><stop offset="0.4" stop-color="#184834"/><stop offset="1" stop-color="#091f16"/></linearGradient>'
         '<radialGradient id="base" cx="0.4" cy="0.3"><stop offset="0" stop-color="#215740"/><stop offset="1" stop-color="#071c13"/></radialGradient>'
         '</defs>'
         '<g class="lit">'
-        '<polygon points="50,160 250,160 360,520 -60,520" fill="url(#cone)"/>'
-        '<polygon points="88,160 212,160 292,505 8,505" fill="url(#cone)"/>'
-        '<ellipse cx="150" cy="508" rx="145" ry="18" fill="url(#pool)"/>'
+        '<ellipse cx="150" cy="300" rx="340" ry="360" fill="url(#spread)"/>'
+        '<polygon points="70,160 230,160 345,520 -45,520" fill="url(#cone)" mask="url(#conemask)"/>'
+        '<ellipse cx="150" cy="506" rx="210" ry="30" fill="url(#pool)"/>'
         '<circle cx="150" cy="168" r="50" fill="url(#glow)"/>'
         '</g>'
         '<ellipse cx="150" cy="510" rx="62" ry="12" fill="#030c08" opacity="0.8"/>'

@@ -1190,8 +1190,12 @@ LAMP_CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,500&display=swap');
 /* The whole page turns dark green while the lamp login is shown */
-.stApp { background: radial-gradient(ellipse 80% 70% at 30% 50%, #0c3a2a 0%, #082a1e 55%, #051710 100%) !important; }
-.stApp::before, .stApp::after { display: none !important; }
+.stApp { background: radial-gradient(ellipse 80% 70% at 30% 50%, #062319 0%, #041710 55%, #020b07 100%) !important; }
+.stApp::after { display: none !important; }
+/* The soft light that spreads over the page. It is always there and fades in and out. */
+.stApp::before { display: block !important; content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0;
+    background: radial-gradient(ellipse 55% 60% at 27% 52%, rgba(190, 245, 140, 0.22), rgba(120, 210, 110, 0.07) 55%, transparent 80%);
+    width: auto; height: auto; right: auto; left: 0; clip-path: none; animation: none; }
 header[data-testid="stHeader"] { background: transparent !important; }
 .topbar .brand b { color: #ffffff !important; }
 .topbar .brand small { color: #9bc4ae !important; }
@@ -1201,24 +1205,20 @@ div[class*="st-key-langsel_land"] button { background: rgba(255, 255, 255, 0.08)
 div[class*="st-key-langsel_land"] button, div[class*="st-key-langsel_land"] button * { color: #e8f7ee !important; }
 
 /* Lamp stage: same size in both states so nothing jumps */
-.st-key-lampstage { min-height: 600px; align-items: center; }
 .st-key-lampwrap { will-change: transform; backface-visibility: hidden; position: relative; width: 300px; max-width: 100%; margin: 0 auto; }
 .lamp-svg { shape-rendering: geometricPrecision; transform: translateZ(0); display: block; width: 300px; max-width: 100%; height: auto; overflow: visible; }
 .lamp-svg .sway { transform-origin: 205px 150px; animation: sway 3.2s ease-in-out infinite; }
-.lamp-svg .tug { transform-origin: 205px 150px; animation: tug 1.6s ease-out both; }
-.lamp-svg .cone { animation: fadeup 1.6s ease-out 0.5s both; }
-.lamp-svg .wash { animation: fadeup 2.2s ease-out 0.6s both; }
-.lamp-svg .bulbon { animation: flick 1.3s linear 0.2s both; }
-.lamp-svg .shadeon { animation: flick 1.3s linear 0.2s both; }
+.lamp-svg .pullg { transform-origin: 205px 150px; }
+.lamp-svg .lit { opacity: 0; }
 .legal { text-align: center; margin: 18px 0 0 0; }
 .legal a { color: #9bc4ae !important; font-size: 13px; margin: 0 12px; text-decoration: none; }
 .legal a:hover { color: #9be564 !important; text-decoration: underline; }
-.lamphint { text-align: center; color: #9bc4ae !important; font-size: 14px; letter-spacing: 0.05em; margin-top: 4px; animation: pulse 2.4s ease-in-out infinite; }
+.lamphint { text-align: center; color: #7fa892 !important; font-size: 14px; letter-spacing: 0.05em; margin: 6px 0 0 0; animation: pulse 2.4s ease-in-out infinite; }
 .st-key-lamp_pull { position: absolute; left: 170px; top: 270px; width: 70px; z-index: 5; }
 .st-key-lamp_pull button { width: 70px; height: 110px; opacity: 0; cursor: pointer; padding: 0; }
 
 /* Login card: dark glass, like a real login panel */
-.st-key-lampcard { max-width: 460px; margin: 0 0 0 auto; animation: cardin 1.3s ease-out 1.0s both;
+.st-key-lampcard { max-width: 460px; margin: 0 0 0 auto; will-change: opacity, transform;
     background: rgba(8, 38, 27, 0.72) !important; backdrop-filter: blur(14px); border: 1px solid rgba(155, 229, 100, 0.25) !important; border-radius: 22px;
     padding: 22px 22px 14px !important; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55), 0 0 70px rgba(155, 229, 100, 0.10); }
 .st-key-lampcard > div { background: transparent; box-shadow: none; border: none; }
@@ -1249,86 +1249,98 @@ div.st-key-lampcard [role="tab"][aria-selected="true"], div.st-key-lampcard [rol
 .st-key-lampcard [data-testid="InputInstructions"], .st-key-lampcard [data-testid="InputInstructions"] * { color: #9bc4ae !important; background: transparent !important; }
 .st-key-lampcard [data-testid="stForm"] { border: none !important; padding: 0 !important; }
 
-/* After the pull the lamp glides from the middle of the page to its place on the left */
-@media (min-width: 901px) { [data-testid="stColumn"] .st-key-lampwrap { animation: slideleft 1.5s cubic-bezier(0.65, 0, 0.35, 1) 0.25s both; } }
-@keyframes slideleft { from { transform: translateX(calc(25vw - 40px)); } to { transform: translateX(0); } }
 @keyframes fadeup { from { opacity: 0; } to { opacity: 1; } }
 @keyframes flick { 0% { opacity: 0; } 30% { opacity: 0.85; } 45% { opacity: 0.7; } 100% { opacity: 1; } }
-@keyframes cardin { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
 @keyframes sway { 0%, 100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } }
-@keyframes tug { 0% { transform: translateY(0) rotate(0); } 12% { transform: translateY(18px) rotate(0); } 30% { transform: translateY(-4px) rotate(5deg); } 50% { transform: rotate(-4deg); } 70% { transform: rotate(2.5deg); } 100% { transform: rotate(0); } }
+@keyframes tugA { 0% { transform: translateY(0) rotate(0); } 12% { transform: translateY(18px) rotate(0); } 30% { transform: translateY(-4px) rotate(5deg); } 50% { transform: rotate(-4deg); } 70% { transform: rotate(2.5deg); } 100% { transform: rotate(0); } }
+@keyframes tugB { 0% { transform: translateY(0) rotate(0); } 12% { transform: translateY(18px) rotate(0); } 30% { transform: translateY(-4px) rotate(5deg); } 50% { transform: rotate(-4deg); } 70% { transform: rotate(2.5deg); } 100% { transform: rotate(0); } }
 @keyframes pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
-@media (max-width: 900px) { .st-key-lampstage { min-height: 0; } .st-key-lampcard { margin: 0 auto; } .cardhead b { font-size: 28px; } .cardhead span { font-size: 22px; } }
+@media (max-width: 900px) { .st-key-lampcard { margin: 0 auto; } .cardhead b { font-size: 28px; } .cardhead span { font-size: 22px; } }
 </style>
 """
 
-# A soft light that spreads over the whole page (only added after the string is pulled)
-LAMP_LIGHT_CSS = """
-<style>
-.stApp::before { display: block !important; content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 1;
-    background: radial-gradient(ellipse 55% 60% at 27% 52%, rgba(190, 245, 140, 0.20), rgba(120, 210, 110, 0.07) 55%, transparent 80%);
-    animation: flick 1.6s linear 0.3s both; width: auto; height: auto; right: auto; left: 0; clip-path: none; }
-</style>
-"""
-
-
-def lamp_svg(on):
-    """The lamp as a small picture. 'on' decides if the light is shining."""
-    light = ""
+def lamp_state_css(n):
+    """CSS for the current state. n counts the pulls: 0 = never pulled, odd = light on, even = light off again.
+    The page keeps the same elements, so these changes fade smoothly instead of jumping."""
+    on = n % 2 == 1
     if on:
-        light = (
-            '<polygon class="wash" points="50,160 250,160 360,520 -60,520" fill="url(#cone)"/>'
-            '<polygon class="cone" points="88,160 212,160 292,505 8,505" fill="url(#cone)"/>'
-            '<ellipse class="cone" cx="150" cy="508" rx="145" ry="18" fill="url(#pool)"/>'
-            '<circle class="bulbon" cx="150" cy="168" r="50" fill="url(#glow)"/>'
-        )
-    bulb = ('<ellipse class="bulbon" cx="150" cy="166" rx="13" ry="15" fill="#f4ffd9"/>' if on
-            else '<ellipse cx="150" cy="166" rx="13" ry="15" fill="#1c4636"/>')
-    shade_on = ('<g class="shadeon"><path d="M105 40 L195 40 L228 150 L72 150 Z" fill="url(#shadeOn)"/>'
-                '<ellipse cx="150" cy="150" rx="78" ry="9" fill="#e9ffc9" opacity="0.55"/></g>') if on else ""
+        css = """
+.lamp-svg .lit { opacity: 1; transition: opacity 1.4s ease 0.15s; }
+.stApp::before { opacity: 1; transition: opacity 2s ease 0.1s; }
+.st-key-lampwrap { transform: translateX(0); transition: transform 1.5s cubic-bezier(0.65, 0, 0.35, 1) 0.1s; }
+.st-key-lampcard { opacity: 1; transform: none; visibility: visible; pointer-events: auto;
+    transition: opacity 1.2s ease 1s, transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) 1s, visibility 0s; }
+.lamphint { opacity: 0; transition: opacity 0.4s ease; }
+.lamp-svg .pullg { animation: tugA 1.6s ease-out both; }
+"""
+    else:
+        sway = "animation: sway 3.2s ease-in-out infinite;" if n == 0 else "animation: tugB 1.6s ease-out both;"
+        css = """
+.lamp-svg .lit { opacity: 0; transition: opacity 0.9s ease; }
+.stApp::before { opacity: 0; transition: opacity 1s ease; }
+.st-key-lampwrap { transform: translateX(calc(25vw - 40px)); transition: transform 1.5s cubic-bezier(0.65, 0, 0.35, 1) 0.5s; }
+.st-key-lampcard { opacity: 0; transform: translateX(34px); visibility: hidden; pointer-events: none;
+    transition: opacity 0.7s ease, transform 0.7s ease, visibility 0s linear 0.7s; }
+.lamphint { opacity: 1; transition: opacity 1s ease 1.6s; }
+.lamp-svg .pullg { %s }
+@media (max-width: 900px) {
+  .st-key-lampwrap { transform: none; }
+  .st-key-lampcard { position: absolute; width: calc(100%% - 2rem); }
+}
+""" % sway
+    return "<style>" + css + "</style>"
+
+
+def lamp_svg():
+    """The lamp as a small picture. The light layers are always there; the state CSS fades them in and out."""
     return (
         '<svg class="lamp-svg" viewBox="0 0 300 540" xmlns="http://www.w3.org/2000/svg">'
         '<defs>'
-        '<linearGradient id="shadeOff" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0a2519"/><stop offset="0.35" stop-color="#1a4a35"/><stop offset="1" stop-color="#0a2519"/></linearGradient>'
+        '<linearGradient id="shadeOff" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#071c13"/><stop offset="0.35" stop-color="#143c2c"/><stop offset="1" stop-color="#071c13"/></linearGradient>'
         '<linearGradient id="shadeOn" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3fae6b"/><stop offset="0.45" stop-color="#c4f594"/><stop offset="1" stop-color="#3fae6b"/></linearGradient>'
         '<linearGradient id="cone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d3f9ae" stop-opacity="0.46"/><stop offset="1" stop-color="#9be564" stop-opacity="0.02"/></linearGradient>'
         '<radialGradient id="pool"><stop offset="0" stop-color="#9be564" stop-opacity="0.55"/><stop offset="1" stop-color="#9be564" stop-opacity="0"/></radialGradient>'
         '<radialGradient id="glow"><stop offset="0" stop-color="#f4ffd9" stop-opacity="0.95"/><stop offset="1" stop-color="#9be564" stop-opacity="0"/></radialGradient>'
-        '<linearGradient id="pole" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0b2b1e"/><stop offset="0.4" stop-color="#1f5a40"/><stop offset="1" stop-color="#0b2b1e"/></linearGradient>'
-        '<radialGradient id="base" cx="0.4" cy="0.3"><stop offset="0" stop-color="#2a6a4d"/><stop offset="1" stop-color="#0a2519"/></radialGradient>'
+        '<linearGradient id="pole" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#091f16"/><stop offset="0.4" stop-color="#184834"/><stop offset="1" stop-color="#091f16"/></linearGradient>'
+        '<radialGradient id="base" cx="0.4" cy="0.3"><stop offset="0" stop-color="#215740"/><stop offset="1" stop-color="#071c13"/></radialGradient>'
         '</defs>'
-        + light +
-        '<ellipse cx="150" cy="510" rx="62" ry="12" fill="#04120b" opacity="0.8"/>'
+        '<g class="lit">'
+        '<polygon points="50,160 250,160 360,520 -60,520" fill="url(#cone)"/>'
+        '<polygon points="88,160 212,160 292,505 8,505" fill="url(#cone)"/>'
+        '<ellipse cx="150" cy="508" rx="145" ry="18" fill="url(#pool)"/>'
+        '<circle cx="150" cy="168" r="50" fill="url(#glow)"/>'
+        '</g>'
+        '<ellipse cx="150" cy="510" rx="62" ry="12" fill="#030c08" opacity="0.8"/>'
         '<ellipse cx="150" cy="500" rx="56" ry="11" fill="url(#base)"/>'
         '<rect x="145" y="150" width="10" height="352" rx="4" fill="url(#pole)"/>'
-        '<rect x="143" y="326" width="14" height="6" rx="2" fill="#9be564"/>'
-        '<rect x="143" y="190" width="14" height="4" rx="2" fill="#9be564" opacity="0.8"/>'
+        '<rect x="143" y="326" width="14" height="6" rx="2" fill="#9be564" opacity="0.55"/>'
+        '<rect x="143" y="190" width="14" height="4" rx="2" fill="#9be564" opacity="0.45"/>'
         '<path d="M105 40 L195 40 L228 150 L72 150 Z" fill="url(#shadeOff)"/>'
-        '<ellipse cx="150" cy="40" rx="45" ry="5" fill="#04120b" opacity="0.6"/>'
-        + shade_on + bulb +
-        f'<g class="{"tug" if on else "sway"}"><line x1="205" y1="150" x2="205" y2="330" stroke="#9be564" stroke-width="2"/>'
+        '<ellipse cx="150" cy="40" rx="45" ry="5" fill="#030c08" opacity="0.6"/>'
+        '<ellipse cx="150" cy="166" rx="13" ry="15" fill="#143c2c"/>'
+        '<g class="lit"><path d="M105 40 L195 40 L228 150 L72 150 Z" fill="url(#shadeOn)"/>'
+        '<ellipse cx="150" cy="150" rx="78" ry="9" fill="#e9ffc9" opacity="0.55"/>'
+        '<ellipse cx="150" cy="166" rx="13" ry="15" fill="#f4ffd9"/></g>'
+        '<g class="pullg"><line x1="205" y1="150" x2="205" y2="330" stroke="#9be564" stroke-width="2"/>'
         '<circle cx="205" cy="338" r="7" fill="#9be564"/></g>'
         '</svg>'
     )
 
 
-def lamp_scene(on):
-    """Off: only the lamp. On: the lamp lights up and the login card shows next to it."""
-    st.markdown(LAMP_CSS + (LAMP_LIGHT_CSS if on else ""), unsafe_allow_html=True)
-    if not on:
-        with st.container(key="lampstage"):
-            with st.container(key="lampwrap"):
-                st.markdown(lamp_svg(False), unsafe_allow_html=True)
-                if st.button(" ", key="lamp_pull", help=t("Pull the string")):
-                    st.session_state.lamp_on = True
-                    st.rerun()
-            st.markdown(f'<p class="lamphint">{t("Pull the string to turn on the light")}</p>', unsafe_allow_html=True)
-            st.markdown(legal_links(), unsafe_allow_html=True)
-        return None
+def lamp_scene():
+    """The lamp and the login card are always on the page. Pulling the string toggles the light with smooth fades."""
+    n = st.session_state.get("lamp_n", 0)
+    st.markdown(LAMP_CSS, unsafe_allow_html=True)
+    st.markdown(lamp_state_css(n), unsafe_allow_html=True)
     left, right = st.columns(2, gap="large", vertical_alignment="center")
     with left:
         with st.container(key="lampwrap"):
-            st.markdown(lamp_svg(True), unsafe_allow_html=True)
+            st.markdown(lamp_svg(), unsafe_allow_html=True)
+            if st.button(" ", key="lamp_pull", help=t("Pull the string")):
+                st.session_state.lamp_n = n + 1
+                st.rerun()
+            st.markdown(f'<p class="lamphint">{t("Pull the string to turn on the light")}</p>', unsafe_allow_html=True)
+    st.markdown(legal_links(), unsafe_allow_html=True)
     return right
 
 
@@ -1427,10 +1439,7 @@ def landing_page():
     with top_right:
         lang_picker("land")
 
-    lamp_on = st.session_state.get("lamp_on", False)
-    right = lamp_scene(lamp_on)
-    if not lamp_on:
-        st.stop()
+    right = lamp_scene()
 
     with right:
         with st.container(border=True, key="lampcard"):

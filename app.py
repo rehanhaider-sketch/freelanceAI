@@ -600,7 +600,7 @@ FAQ = [
     ("Who is it for?", "It is for freelancers, the person doing the work. The client is the person you write to, not the person who uses the app."),
     ("Is it free?", "The app is free. It can use Google Gemini, Groq and OpenRouter, and the free plans of these APIs have daily and per-minute limits."),
     ("How do I choose or add another AI?", "Use the AI menu in the box where you type, next to the + button. Gemini, Groq and OpenRouter each need their own free key. Put each key in .streamlit/secrets.toml. An AI without a key shows (no key) in the menu."),
-    ("Where is my data saved?", "On the laptop that runs the app. Your profile and history are saved in files, and each account has its own files."),
+    ("Where is my data saved?", "In a Google Firebase Firestore database that belongs to this project. Your account, profile and history are saved there, and each account has its own entries. If Firebase is not set up (for example on a laptop), they are saved in local files instead."),
     ("Is my password safe?", "Your password is never saved as it is. The app saves only a scrambled version (a salted hash), so the real password cannot be read from the file."),
     ("The AI gave a generic answer. Why?", "The AI only knows what is in your profile and your pasted text. Add more skills, projects and results to My Profile to get better answers."),
     ("I see a quota or 429 error. What do I do?", "You used the free limit for now. Wait one minute and try again."),
@@ -611,17 +611,63 @@ FAQ = [
 
 
 # ---------- Helper functions ----------
+# ---------- Saving data ----------
+# If the secret FIREBASE_JSON is set, everything is saved in Firebase Firestore (it survives restarts).
+# If not, everything is saved in local files (fine on your own computer, but lost when free hosting restarts).
+@st.cache_resource
+def firestore_client():
+    """Connect to Firestore once. Returns None if there is no Firebase key."""
+    try:
+        raw = st.secrets.get("FIREBASE_JSON", "")
+    except Exception:
+        raw = ""
+    raw = raw or os.environ.get("FIREBASE_JSON", "")
+    if not raw:
+        return None
+    from google.cloud import firestore
+    return firestore.Client.from_service_account_info(json.loads(raw))
+
+
+def store_get(name, default):
+    """Read one saved item (for example 'users' or '<id>_profile')."""
+    try:
+        client = firestore_client()
+        if client is not None:
+            doc = client.collection("gigflare").document(name).get()
+            return json.loads(doc.to_dict()["data"]) if doc.exists else default
+    except Exception as e:
+        st.session_state["db_error"] = str(e)[:200]
+        raise
+    path = os.path.join(DATA_DIR, f"{name}.json") if name != "users" else USERS_FILE
+    if os.path.exists(path):
+        with open(path, "r") as f:
+            return json.load(f)
+    return default
+
+
+def store_set(name, data):
+    """Save one item."""
+    try:
+        client = firestore_client()
+        if client is not None:
+            client.collection("gigflare").document(name).set({"data": json.dumps(data)})
+            return
+    except Exception as e:
+        st.session_state["db_error"] = str(e)[:200]
+        raise
+    os.makedirs(DATA_DIR, exist_ok=True)
+    path = os.path.join(DATA_DIR, f"{name}.json") if name != "users" else USERS_FILE
+    with open(path, "w") as f:
+        json.dump(data, f)
+
+
 def load_users():
     """Read all accounts (email -> name, salt, password hash)."""
-    if os.path.exists(USERS_FILE):
-        with open(USERS_FILE, "r") as f:
-            return json.load(f)
-    return {}
+    return store_get("users", {})
 
 
 def save_users(users):
-    with open(USERS_FILE, "w") as f:
-        json.dump(users, f)
+    store_set("users", users)
 
 
 def hash_password(password, salt_hex):
@@ -725,30 +771,21 @@ def log_out():
 def load_profile():
     """Read the saved profile of the logged-in user. Missing fields stay empty."""
     profile = dict(EMPTY_PROFILE)
-    path = user_file("profile")
-    if os.path.exists(path):
-        with open(path, "r") as f:
-            profile.update(json.load(f))
+    profile.update(store_get(f"{st.session_state.user['id']}_profile", {}))
     return profile
 
 
 def save_profile(profile):
-    with open(user_file("profile"), "w") as f:
-        json.dump(profile, f)
+    store_set(f"{st.session_state.user['id']}_profile", profile)
 
 
 def load_history():
     """Read all saved AI results of the logged-in user."""
-    path = user_file("history")
-    if os.path.exists(path):
-        with open(path, "r") as f:
-            return json.load(f)
-    return []
+    return store_get(f"{st.session_state.user['id']}_history", [])
 
 
 def save_history(history):
-    with open(user_file("history"), "w") as f:
-        json.dump(history, f)
+    store_set(f"{st.session_state.user['id']}_history", history)
 
 
 def profile_text(profile):
@@ -1304,7 +1341,7 @@ PRIVACY_TEXT = [
     ("What we save",
      "When you sign up we save your name, your email, and your password and recovery word in scrambled form (a salted hash), "
      "so nobody can read them back. If you fill in My Profile, we save that profile. We also save the history of your requests and "
-     "the AI answers, so you can see them again on the History page. This data is saved in files on the server that runs the app."),
+     "the AI answers, so you can see them again on the History page. This data is saved in a Google Firebase Firestore database (a Google service that stores data online)."),
     ("What is sent to the AI companies",
      "When you press send, your text, your saved profile and any file you attached are sent to the AI you chose: Google Gemini, Groq or OpenRouter. "
      "OpenRouter may pass your request on to another company that runs the model. These companies have their own privacy policies. "
@@ -1316,7 +1353,7 @@ PRIVACY_TEXT = [
     ("Sharing",
      "We do not sell your data. Your data is shared only as described above, to get an answer from the AI you chose."),
     ("How long we keep data",
-     "Your data stays until it is deleted. Because the app runs on free hosting, saved data can also be lost when the app restarts."),
+     "Your data stays until it is deleted. It is kept in the database, so it is not lost when the app goes to sleep or restarts."),
     ("Your choices",
      "You can ask for your account and saved data to be deleted. {contact}"),
     ("Changes",

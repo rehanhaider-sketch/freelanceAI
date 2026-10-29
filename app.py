@@ -780,24 +780,64 @@ def start_session(email):
     st.session_state["pending_cookie"] = token
 
 
+@st.cache_resource
+def login_components():
+    """Three tiny Streamlit components that keep, read and forget the login code in the browser."""
+    save_js = """
+    export default function(component) {
+        const { data } = component;
+        try {
+            localStorage.setItem('%s', data.token);
+            document.cookie = '%s=' + data.token + '; max-age=' + data.seconds + '; path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+        } catch (e) {}
+    }
+    """ % (COOKIE_NAME, COOKIE_NAME)
+    clear_js = """
+    export default function(component) {
+        try {
+            localStorage.removeItem('%s');
+            document.cookie = '%s=; max-age=0; path=/; SameSite=Lax';
+        } catch (e) {}
+    }
+    """ % (COOKIE_NAME, COOKIE_NAME)
+    read_js = """
+    export default function(component) {
+        const { setTriggerValue } = component;
+        let token = '';
+        try { token = localStorage.getItem('%s') || ''; } catch (e) {}
+        setTriggerValue('token', token);
+    }
+    """ % COOKIE_NAME
+    return (st.components.v2.component("gf_login_save", js=save_js),
+            st.components.v2.component("gf_login_clear", js=clear_js),
+            st.components.v2.component("gf_login_read", js=read_js))
+
+
 def cookie_script(token, days):
-    """A tiny script that sets (or, with days=0, removes) the login cookie in the browser."""
-    seconds = int(days * 86400)
-    st.components.v1.html(
-        "<script>try{var w=window.parent;var c='" + COOKIE_NAME + "=" + token + "; max-age=" + str(seconds)
-        + "; path=/; SameSite=Lax'+(w.location.protocol==='https:'?'; Secure':'');w.document.cookie=c;}catch(e){}</script>",
-        height=0,
-    )
+    """Save the login code in the browser (days > 0) or remove it (days = 0)."""
+    save, clear, _ = login_components()
+    if days > 0:
+        save(data={"token": token, "seconds": int(days * 86400)}, key="gf_save_" + token[:8])
+    else:
+        clear(key="gf_clear_" + str(int(time.time())))
 
 
-def restore_session():
-    """If the browser has a valid login cookie, return that user. Otherwise None."""
+def browser_token():
+    """Ask the browser for the saved login code. The answer arrives on the next run of the page."""
+    _, _, read = login_components()
+    result = read(key="gf_read", on_token_change=lambda: None)
+    return getattr(result, "token", None) or ""
+
+
+def restore_session(token=None):
+    """If there is a valid login code (cookie or browser storage), return that user. Otherwise None."""
     try:
-        token = st.context.cookies.get(COOKIE_NAME)
+        token = token or st.context.cookies.get(COOKIE_NAME)
         if not token:
             return None
         saved = store_get(token_key(token), None)
         if not saved or saved.get("exp", 0) < time.time():
+            st.session_state["bad_token"] = True
             return None
         record = load_users().get(saved["email"])
         return make_user(saved["email"], record["name"]) if record else None
@@ -1565,8 +1605,15 @@ if "user" not in st.session_state:
     if restored:
         st.session_state.user = restored
 if "user" not in st.session_state:
-    if st.session_state.pop("clear_cookie", False):
+    if st.session_state.pop("clear_cookie", False) or st.session_state.get("bad_token"):
         cookie_script("", 0)
+    else:
+        from_browser = browser_token()
+        if from_browser:
+            restored = restore_session(from_browser)
+            if restored:
+                st.session_state.user = restored
+if "user" not in st.session_state:
     landing_page()
     st.stop()
 

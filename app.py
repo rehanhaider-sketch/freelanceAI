@@ -5,6 +5,7 @@ import os
 import re
 import secrets
 import shutil
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime
@@ -762,10 +763,64 @@ def reset_password(email, recovery, new_password, confirm):
     return True, t("Password changed. You can log in now.")
 
 
+# ---------- Staying logged in after a reload ----------
+# After login a random token is saved in a browser cookie. Only a scrambled copy of the token is saved in the database.
+COOKIE_NAME = "gf_session"
+SESSION_DAYS = 14
+
+
+def token_key(token):
+    return "session_" + hashlib.sha256(token.encode()).hexdigest()[:40]
+
+
+def start_session(email):
+    """Make a login token. The page puts it in a cookie after the next run."""
+    token = secrets.token_urlsafe(32)
+    store_set(token_key(token), {"email": email, "exp": time.time() + SESSION_DAYS * 86400})
+    st.session_state["pending_cookie"] = token
+
+
+def cookie_script(token, days):
+    """A tiny script that sets (or, with days=0, removes) the login cookie in the browser."""
+    seconds = int(days * 86400)
+    st.components.v1.html(
+        "<script>try{var w=window.parent;var c='" + COOKIE_NAME + "=" + token + "; max-age=" + str(seconds)
+        + "; path=/; SameSite=Lax'+(w.location.protocol==='https:'?'; Secure':'');w.document.cookie=c;}catch(e){}</script>",
+        height=0,
+    )
+
+
+def restore_session():
+    """If the browser has a valid login cookie, return that user. Otherwise None."""
+    try:
+        token = st.context.cookies.get(COOKIE_NAME)
+        if not token:
+            return None
+        saved = store_get(token_key(token), None)
+        if not saved or saved.get("exp", 0) < time.time():
+            return None
+        record = load_users().get(saved["email"])
+        return make_user(saved["email"], record["name"]) if record else None
+    except Exception:
+        return None
+
+
+def end_session():
+    """Forget the login token on the server."""
+    try:
+        token = st.context.cookies.get(COOKIE_NAME)
+        if token:
+            store_set(token_key(token), {})
+    except Exception:
+        pass
+
+
 def log_out():
+    end_session()
     lang = st.session_state.get("lang", "en")
     st.session_state.clear()
     st.session_state["lang"] = lang
+    st.session_state["clear_cookie"] = True
 
 
 def load_profile():
@@ -1362,10 +1417,13 @@ PRIVACY_TEXT = [
      "When you press send, your text, your saved profile and any file you attached are sent to the AI you chose: Google Gemini, Groq or OpenRouter. "
      "OpenRouter may pass your request on to another company that runs the model. These companies have their own privacy policies. "
      "Please do not enter passwords, bank details or other private information into the tools."),
+    ("Staying logged in",
+     "When you log in, Gigflare puts one cookie in your browser. It keeps you logged in for {days} days, even if you reload the page. "
+     "The cookie holds a random code, not your password. Pressing Log out removes it."),
     ("Your own API key",
      "If you type your own API key in the account menu, it is kept only while your session is open. It is not saved in our files."),
     ("Ads and tracking",
-     "Gigflare shows no ads and has no analytics or tracking code of its own. The hosting service may keep technical logs and may use its own cookies to run the app."),
+     "Gigflare shows no ads and has no analytics or tracking code of its own. The login cookie above is the only cookie we set. The hosting service may keep technical logs and may use its own cookies to run the app."),
     ("Sharing",
      "We do not sell your data. Your data is shared only as described above, to get an answer from the AI you chose."),
     ("How long we keep data",
@@ -1405,7 +1463,7 @@ def legal_page(kind):
     """A plain page for the Privacy Policy or the Terms and Conditions."""
     title, rows = ("Privacy Policy", PRIVACY_TEXT) if kind == "privacy" else ("Terms and Conditions", TERMS_TEXT)
     contact = f"Contact: {escape(CONTACT_EMAIL)}." if CONTACT_EMAIL else ""
-    fill = {"name": escape(DEVELOPER["name"]), "university": escape(DEVELOPER["university"]), "course": escape(DEVELOPER["course"]), "contact": contact}
+    fill = {"name": escape(DEVELOPER["name"]), "university": escape(DEVELOPER["university"]), "course": escape(DEVELOPER["course"]), "contact": contact, "days": SESSION_DAYS}
     body = "".join(f"<h3>{escape(head)}</h3><p>{text.format(**fill)}</p>" for head, text in rows)
     st.markdown(
         """<style>
@@ -1460,6 +1518,7 @@ def landing_page():
                     if user:
                         st.session_state.user = user
                         st.session_state.just_logged_in = True
+                        start_session(user["email"])
                         st.rerun()
                     else:
                         st.error(t("Wrong email or password."))
@@ -1478,6 +1537,7 @@ def landing_page():
                     if user:
                         st.session_state.user = user
                         st.session_state.just_logged_in = True
+                        start_session(user["email"])
                         st.rerun()
                     else:
                         st.error(error)
@@ -1501,11 +1561,21 @@ if st.query_params.get("doc") in ("privacy", "terms"):
 
 # ---------- Not logged in? Show the landing page and stop ----------
 if "user" not in st.session_state:
+    restored = restore_session()
+    if restored:
+        st.session_state.user = restored
+if "user" not in st.session_state:
+    if st.session_state.pop("clear_cookie", False):
+        cookie_script("", 0)
     landing_page()
     st.stop()
 
 # ---------- From here on, the user is logged in ----------
 user = st.session_state.user
+
+# Put the login cookie in the browser (only right after logging in)
+if st.session_state.get("pending_cookie"):
+    cookie_script(st.session_state.pop("pending_cookie"), SESSION_DAYS)
 
 # Smooth entrance right after logging in: the dark green of the lamp page fades away,
 # the top bar slides down and the page content rises in.

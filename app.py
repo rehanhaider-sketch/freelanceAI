@@ -826,7 +826,7 @@ def browser_token():
     """Ask the browser for the saved login code. The answer arrives on the next run of the page."""
     _, _, read = login_components()
     result = read(key="gf_read", on_token_change=lambda: None)
-    return getattr(result, "token", None) or ""
+    return getattr(result, "token", None)  # None means the browser has not answered yet
 
 
 def restore_session(token=None):
@@ -861,6 +861,7 @@ def log_out():
     st.session_state.clear()
     st.session_state["lang"] = lang
     st.session_state["clear_cookie"] = True
+    st.session_state["ls_checked"] = True
 
 
 def load_profile():
@@ -1600,19 +1601,37 @@ if st.query_params.get("doc") in ("privacy", "terms"):
     st.stop()
 
 # ---------- Not logged in? Show the landing page and stop ----------
+WAIT_CSS = """
+<style>
+[data-testid="stAppViewContainer"]::after { content: ""; position: fixed; inset: 0; z-index: 100000; pointer-events: none;
+    background: radial-gradient(ellipse 80% 70% at 30% 50%, #062319 0%, #041710 55%, #020b07 100%);
+    animation: gfwait 0.6s ease 4s forwards; }
+@keyframes gfwait { to { opacity: 0; visibility: hidden; } }
+</style>
+"""
+
 if "user" not in st.session_state:
     restored = restore_session()
     if restored:
         st.session_state.user = restored
+        st.session_state.just_logged_in = True
 if "user" not in st.session_state:
-    if st.session_state.pop("clear_cookie", False) or st.session_state.get("bad_token"):
+    if st.session_state.pop("clear_cookie", False) or st.session_state.pop("bad_token", False):
         cookie_script("", 0)
-    else:
-        from_browser = browser_token()
-        if from_browser:
-            restored = restore_session(from_browser)
+        st.session_state["ls_checked"] = True
+    if not st.session_state.get("ls_checked"):
+        saved_token = browser_token()
+        if saved_token is None:
+            # The browser has not answered yet. Show a calm dark screen instead of flashing the login page.
+            st.markdown(WAIT_CSS, unsafe_allow_html=True)
+            landing_page()
+            st.stop()
+        st.session_state["ls_checked"] = True
+        if saved_token:
+            restored = restore_session(saved_token)
             if restored:
                 st.session_state.user = restored
+                st.session_state.just_logged_in = True
 if "user" not in st.session_state:
     landing_page()
     st.stop()
@@ -1631,7 +1650,7 @@ if st.session_state.pop("just_logged_in", False):
         """
         <style>
         [data-testid="stAppViewContainer"]::after { content: ""; position: fixed; inset: 0; z-index: 100000; pointer-events: none;
-            background: radial-gradient(ellipse 80% 70% at 30% 50%, #0c3a2a 0%, #082a1e 55%, #051710 100%);
+            background: radial-gradient(ellipse 80% 70% at 30% 50%, #062319 0%, #041710 55%, #020b07 100%);
             animation: enterfade 1.1s ease-out 0.05s both; }
         div:has(> .st-key-topnav) { animation: navdown 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.35s both; }
         div[data-testid="stMainBlockContainer"] > div > div:not(:has(.st-key-topnav)) { animation: pagerise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.5s both; }

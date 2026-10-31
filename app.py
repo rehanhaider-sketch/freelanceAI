@@ -1657,6 +1657,9 @@ WAIT_CSS = """
     background: radial-gradient(ellipse 80% 70% at 30% 50%, #062319 0%, #041710 55%, #020b07 100%);
     animation: gfwait 0.6s ease 4s forwards; }
 @keyframes gfwait { to { opacity: 0; visibility: hidden; } }
+/* Keep the page underneath hidden while we wait, so nothing flashes. If the browser never answers, show it after 4 seconds. */
+[data-testid="stMain"], header[data-testid="stHeader"] { visibility: hidden; animation: gfshow 0s linear 4s forwards; }
+@keyframes gfshow { to { visibility: visible; } }
 </style>
 """
 

@@ -18,18 +18,62 @@ from google.genai import types
 from translations import AI_LANGUAGE_NAME, LANGUAGES, POSITION, TEXTS
 
 # ---------- Page setup ----------
-def make_icon():
-    """The tab icon: a green rounded square with a white lamp and a lime bulb."""
+def make_icon(size=128, dark=True):
+    """The Gigflare icon: an arc floor lamp that is also the letter f. Used for the browser tab."""
     try:
         from PIL import Image, ImageDraw
-        img = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
-        d = ImageDraw.Draw(img)
-        d.rounded_rectangle((0, 0, 127, 127), radius=34, fill="#16a05a")
-        d.polygon([(40, 24), (88, 24), (106, 76), (22, 76)], fill="white")
-        d.ellipse((50, 78, 78, 106), fill="#9be564")
-        d.line([(26, 96), (16, 104)], fill="#9be564", width=8)
-        d.line([(102, 96), (112, 104)], fill="#9be564", width=8)
-        return img
+        k = 4 * size / 120  # draw 4 times bigger, then shrink for smooth edges
+        big = int(size * 4)
+        fg = (180, 240, 128, 255) if dark else (13, 59, 42, 255)
+        shade = (242, 251, 245, 255) if dark else (13, 59, 42, 255)
+        tile = Image.new("RGBA", (big, big), (0, 0, 0, 0))
+        td = ImageDraw.Draw(tile)
+        if dark:
+            for y in range(big):  # soft top-left to bottom-right shade of dark green
+                f = y / big
+                c = (int(15 - 9 * f), int(74 - 39 * f), int(51 - 25 * f), 255)
+                td.line([(0, y), (big, y)], fill=c)
+        else:
+            td.rectangle((0, 0, big, big), fill=(180, 240, 128, 255))
+        mask = Image.new("L", (big, big), 0)
+        ImageDraw.Draw(mask).rounded_rectangle((0, 0, big - 1, big - 1), radius=int(27 * k), fill=255)
+        art = Image.new("RGBA", (big, big), (0, 0, 0, 0))
+        # light cone with a fading top-to-bottom glow
+        cone = Image.new("RGBA", (big, big), (0, 0, 0, 0))
+        cd = ImageDraw.Draw(cone)
+        for y in range(48 * 10, 110 * 10):
+            yy = y / 10
+            u = (yy - 48) / 62
+            left, right = 64 + (50 - 64) * u, 98 + (112 - 98) * u
+            alpha = int(255 * (0.6 if dark else 0.4) * (1 - u))
+            cd.line([(left * k, yy * k), (right * k, yy * k)], fill=fg[:3] + (alpha,), width=max(1, int(k / 5)))
+        art.alpha_composite(cone)
+        d = ImageDraw.Draw(art)
+
+        def stroke(points, width):
+            r = width * k / 2
+            for (x1, y1), (x2, y2) in zip(points, points[1:]):  # stamp small circles along the path: smooth and round
+                steps = max(2, int(((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5 * 4))
+                for n in range(steps + 1):
+                    x = x1 + (x2 - x1) * n / steps
+                    y = y1 + (y2 - y1) * n / steps
+                    d.ellipse((x * k - r, y * k - r, x * k + r, y * k + r), fill=fg)
+
+        curve = []
+        for n in range(41):  # the arm of the lamp: a smooth curve from the stem up and over
+            u = n / 40
+            x = (1 - u) ** 3 * 40 + 3 * (1 - u) ** 2 * u * 40 + 3 * (1 - u) * u ** 2 * 56 + u ** 3 * 78
+            y = (1 - u) ** 3 * 56 + 3 * (1 - u) ** 2 * u * 32 + 3 * (1 - u) * u ** 2 * 22 + u ** 3 * 24
+            curve.append((x, y))
+        stroke([(40, 106), (40, 56)] + curve, 10)
+        stroke([(24, 66), (58, 66)], 10)
+        stroke([(80, 24), (80, 32)], 5)
+        d.polygon([(70 * k, 32 * k), (90 * k, 32 * k), (100 * k, 48 * k), (60 * k, 48 * k)], fill=shade)
+        out = Image.new("RGBA", (big, big), (0, 0, 0, 0))
+        out.paste(tile, (0, 0), mask)
+        out.alpha_composite(art)
+        out.putalpha(Image.composite(out.getchannel("A"), Image.new("L", (big, big), 0), mask))
+        return out.resize((size, size), Image.LANCZOS)
     except Exception:
         return "G"
 
@@ -72,10 +116,15 @@ def lang_picker(where):
 
 # The Gigflare logo: a lamp with a glowing bulb (drawn as a tiny picture)
 LOGO_SVG = (
-    '<svg viewBox="0 0 48 48" width="24" height="24" aria-hidden="true">'
-    '<path d="M15 9h18l7 19H8z" fill="currentColor"/>'
-    '<circle class="dot" cx="24" cy="35" r="4.4"/>'
-    '<path class="ray" d="M10 36l-4 3M38 36l4 3" stroke-width="3" stroke-linecap="round"/></svg>'
+    '<svg viewBox="0 0 120 120" width="100%" height="100%" aria-hidden="true">'
+    '<defs><linearGradient id="gfbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f4a33"/><stop offset="1" stop-color="#06231a"/></linearGradient>'
+    '<linearGradient id="gfbeam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b4f080" stop-opacity=".6"/><stop offset="1" stop-color="#b4f080" stop-opacity="0"/></linearGradient></defs>'
+    '<rect width="120" height="120" rx="27" fill="url(#gfbg)"/><rect x="1" y="1" width="118" height="118" rx="26" fill="none" stroke="#9be564" stroke-opacity=".35" stroke-width="2"/>'
+    '<path d="M64 48L98 48L112 110L50 110Z" fill="url(#gfbeam)"/>'
+    '<path d="M40 106V56C40 32 56 22 78 24" fill="none" stroke="#b4f080" stroke-width="10" stroke-linecap="round"/>'
+    '<line x1="24" y1="66" x2="58" y2="66" stroke="#b4f080" stroke-width="10" stroke-linecap="round"/>'
+    '<line x1="80" y1="24" x2="80" y2="32" stroke="#b4f080" stroke-width="5" stroke-linecap="round"/>'
+    '<path d="M70 32L90 32L100 48L60 48Z" fill="#f2fbf5"/></svg>'
 )
 
 # ---------- Look and feel (CSS) ----------
@@ -421,6 +470,7 @@ st.markdown(
     .logo.lime { background: #9be564 !important; color: #06180f !important; }
     .logo.lime .dot { fill: #06180f; }
     .logo.lime .ray { stroke: #06180f; }
+    .logo, .logo.lime { background: transparent !important; padding: 0; overflow: hidden; }
 
     /* ----- Top menu bar (dark green, replaces the sidebar) ----- */
     section[data-testid="stSidebar"], div[data-testid="stSidebarCollapsedControl"], button[data-testid="stExpandSidebarButton"] { display: none !important; }
